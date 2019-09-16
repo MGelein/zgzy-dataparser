@@ -55,10 +55,13 @@ if (outputFile.length < 1) {
 }
 
 //Now that we know all the files are correct, let's start the actual process
-print(`Loading files...
+print(`Config:
 HTML:   ${htmlFile}
 CSV:    ${csvFile}
-OUTPUT: ${outputFile}\n`);
+OUTPUT: ${outputFile}\n\n`);
+
+//Prepare the global output object
+var output = {};
 
 //Read both files into memory, then continue the parsing
 var html;
@@ -90,7 +93,7 @@ fs.readFile(csvFile, "utf-8", (err, data) => {
         }
         let parts = line.split(",");
         //Add it to the list of chapters
-        csv.chapters.push({num: parseInt(parts[0]), title: parse[1].trim()});
+        csv.chapters.push({num: parseInt(parts[0]), title: parts[1].trim()});
     }
     csvParsed = true;
     print("CSV file loaded!\n");
@@ -104,6 +107,49 @@ fs.readFile(csvFile, "utf-8", (err, data) => {
 function startConversion(){
     //Abort conversion untill both data files have been parsed.
     if(!csvParsed || !htmlParsed) return;
+    print("Cleaning HTML data, removing unnecessary tags...\r");
+
+    //Remove anything related to comments or glyphicons, we don't need that.
+    $(html).find('.commentContainer, .glyphicon').remove();
+    $(html).find('[x_origin]').removeAttr('x_origin y_origin');
+    $(html).find('[refered]').removeAttr('refered');
+    $(html).find('.unsolved,.manual').removeClass('unsolved manual');
+    print("Loading HTML passages into memory...                     \r");
+    $(html).find('.passage').each((index, element)=>{
+        //The first passage is the title statement
+        if(index == 0){
+            output.edition = $(element).text().trim();
+            output.passages = [];
+            return;
+        }
+        //Get the raw HTML data for a passage
+        let psgHTML = $(element).html();
+        //Retrieve the passage info from it
+        psgHTML = psgHTML.replace(/(&lt;C\d+\.\d+&gt;\d+)/gi, '%MARKER%');
+        let psgInfo = (RegExp.$1).replace(/&lt;/g, '').replace(/&gt;/g, '-');
+        psgHTML = psgHTML.replace(/"/g, "'");
+        let parts = psgInfo.split("-");
+        if(parts.length < 2) return;
+        let passageID = parseInt(parts[1].trim());
+        parts = parts[0].replace(/C/gi, '').split(".");
+        let chapter = parseInt(parts[0]);
+        let paragraph = parseInt(parts[1]);
+        let markerIndex =  psgHTML.indexOf('%MARKER%');
+        let header = psgHTML.substring(0, markerIndex).replace(/[\n\r\t]/g, '').trim();
+        if(header.length > 2) print("CHAPTER: " + header + "\n");
+        psgHTML = psgHTML.substring(markerIndex).replace('%MARKER%', '').trim();//Remove the first part from it
+        print(`Global ${passageID} chapter: ${chapter} and paragraph: ${paragraph}\n`);
+        //Create the new passage object
+        newPassage = {
+            'chapter': chapter,
+            'paragraph': paragraph,
+            'id': passageID,
+            'html': psgHTML
+        };
+        output.passages.push(newPassage);
+    });
+    print("Parsed all passages, ready to save to disk...");
+    fs.writeFileSync(outputFile, JSON.stringify(output, null, 4), "utf-8");
 }
 
 
