@@ -133,7 +133,7 @@ function startConversion(){
         let passageID = parseInt(parts[1].trim());
         parts = parts[0].replace(/C/gi, '').split(".");
         let chapter = parseInt(parts[0]);
-        let paragraph = parseInt(parts[1]);
+        let paragraph = parts[1];
         let markerIndex =  psgHTML.indexOf('%MARKER%');
         let header = psgHTML.substring(0, markerIndex).replace(/[\n\r\t]/g, '').trim();
         if(header.length > 2) print("CHAPTER: " + header + "\n");
