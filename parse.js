@@ -125,13 +125,13 @@ function startConversion(){
         //Get the raw HTML data for a passage
         let psgHTML = $(element).html();
         //Retrieve the passage info from it
-        psgHTML = psgHTML.replace(/(&lt;C\d+\.\d+&gt;\d+)/gi, '%MARKER%');
+        psgHTML = psgHTML.replace(/(&lt;C\d+\.\d+[a-z]?&gt;\d+[a-z]?)/gi, '%MARKER%');
         let psgInfo = (RegExp.$1).replace(/&lt;/g, '').replace(/&gt;/g, '-');
+        console.log("info: ", psgInfo)
         psgHTML = psgHTML.replace(/"/g, "'");
         let parts = psgInfo.split("-");
-        console.log(parts)
         if(parts.length < 2) return;
-        let passageID = parseInt(parts[1].trim());
+        let passageID = parts[1].trim();
         parts = parts[0].replace(/C/gi, '').split(".");
         let chapter = parseInt(parts[0]);
         let paragraph = parts[1];
@@ -139,7 +139,7 @@ function startConversion(){
         let header = psgHTML.substring(0, markerIndex).replace(/[\n\r\t]/g, '').trim();
         if(header.length > 2) print("CHAPTER: " + header + "\n");
         psgHTML = psgHTML.substring(markerIndex).replace('%MARKER%', '').trim();//Remove the first part from it
-        print(`Global ${passageID} chapter: ${chapter} and paragraph: ${paragraph}\n`);
+        //print(`Global ${passageID} chapter: ${chapter} and paragraph: ${paragraph}\n`);
         //Create the new passage object
         newPassage = {
             'chapter': chapter,
