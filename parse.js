@@ -129,6 +129,7 @@ function startConversion(){
         let psgInfo = (RegExp.$1).replace(/&lt;/g, '').replace(/&gt;/g, '-');
         psgHTML = psgHTML.replace(/"/g, "'");
         let parts = psgInfo.split("-");
+        console.log(parts)
         if(parts.length < 2) return;
         let passageID = parseInt(parts[1].trim());
         parts = parts[0].replace(/C/gi, '').split(".");
