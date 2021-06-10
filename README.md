@@ -11,3 +11,8 @@ The data needs to contain at least the following:
 - The id of every passage, as well as the title
 - Any 'normal' MARKUS tags, such as people, places or titles
 - The index of that specific text
+
+## Replacing stuff with regex
+```
+<[cC](\d+.\d+)>  gets replaced by &lt;C$1&gt;
+```
