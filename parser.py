@@ -1,10 +1,11 @@
 output = []
 
-with open("linking_orig.csv", "r") as f:
+with open("./output/linking_orig.csv", "r", encoding='utf16') as f:
     for line in f:
         if not line or  len(line) < 1:
             continue
         line = line.replace('\n', '')
+        if '@' not in line: continue
         parts = line.split(",")
         
         for i in range(len(parts)):
@@ -17,5 +18,5 @@ with open("linking_orig.csv", "r") as f:
                     continue
                 output.append("%s, %s\n" % (from_part, to_part))
 
-with open("linking.csv", "w") as f:
+with open("linking.csv", "w", encoding='utf16') as f:
     f.writelines(output)
